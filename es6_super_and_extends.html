@@ -1,0 +1,517 @@
+<html>
+<style>
+    .blue {
+        font-weight: bold;
+        color: #3366cc;
+    }
+
+    .red {
+        font-weight: bold;
+        color: #ff0033;
+    }
+
+    h2 {
+        font-weight: bold;
+        color: #3366cc;
+    }
+
+    pre {
+        background-color: #efefef;
+        width: 75%;
+    }
+
+    .small {
+        font-size: 80%;
+    }
+</style>
+
+<body>
+
+    <p><span class="blue">original page</span><br>
+        <a href="https://medium.com/beginners-guide-to-mobile-web-development/super-and-extends-in-javascript-es6-understanding-the-tough-parts-6120372d3420"
+            target="_blank">“Super” and “Extends” In JavaScript ES6 - Understanding The Tough Parts</a></p>
+
+    <p>上記記事を自分なりに解釈する為に翻訳してメモ。<br>（訳が間違っている可能性もあるので、その場合は原文を当たって下さい）</p>
+
+    <h1>Medium: JavaScript ES6の「Super」と「Extends」- 難しい部分を理解する</h1>
+
+    <p>
+        ES6では、クラス構文とその追加機能により、JavaScriptの外観が非常にシンプルになりました。<br />
+        今日は、クラス構文機能と継承の概念を組み合わせて、コードを実行します。<br />
+        はい、お察しの通り、JavaScriptのES6でスーパーとキーワードを拡張します。<br />
+        新しい機能を学ぶ最良の方法は、例を挙げてすぐに掘り下げる事です。
+        それでは、やってみましょう！
+    </p>
+
+    <h2>super()およびExtendsの実行</h2>
+    <p>
+        JavaScriptでクラスを拡張する場合は、キーワードsuperを使用して拡張出来ます。</br>
+        これらのキーワードの使用方法の例を見てみましょう。
+    </p>
+
+    <pre>
+
+class Animal {
+    constructor(name, weight) {
+        this.name = name;
+        this.weight = weight;
+    }
+
+    eat() {
+        return `${this.name} is eating!`;
+    }
+
+    sleep() {
+        return `${this.name} is going to sleep!`;
+    }
+
+    wakeUp() {
+        return `${this.name} is waking up!`;
+    }
+
+}
+
+class Gorilla extends Animal {
+    constructor(name, weight) {
+        super(name, weight);
+    }
+
+    climbTrees() {
+        return `${this.name} is climbing trees!`;
+    }
+
+    poundChest() {
+        return `${this.name} is pounding its chest!`;
+    }
+
+    showVigour() {
+        return `${super.eat()} ${this.poundChest()}`;
+    }
+
+    dailyRoutine() {
+        return `${super.wakeUp()} ${this.poundChest()} ${super.eat()} ${super.sleep()}`;
+    }
+
+}
+
+function display(content) {
+    console.log(content);
+}
+
+const gorilla = new Gorilla('George', '160Kg');
+display(gorilla.poundChest());
+display(gorilla.sleep());
+display(gorilla.showVigour());
+display(gorilla.dailyRoutine());
+
+// OUTPUT:
+// George is pounding its chest!
+// George is going to sleep!
+// George is eating! George is pounding its chest!
+// George is waking up! George is pounding its chest! George is eating! George is going to sleep!
+
+    </pre>
+
+    <p class="small">[ES6クラスおよびサブクラスの構文]</p>
+
+    <p>
+        上記のコードには、AnimalとGorillaという2つのJavaScriptクラスがあります。
+    </p>
+
+    <p>
+        GorillaクラスはAnimalのサブクラスまたは子クラスであり、extendsキーワードを使用して自身をサブクラスとして設定します。
+    </p>
+
+    <p>
+        ただし、superキーワードは2つの異なる方法で使用されています。<br>
+        皆さんも同じ事に気づきましたか？<br>
+        Gorillaのコンストラクター（コードの23行目の）<span class="red">super()は「関数」として使用されます。</span><br>
+        一方、GorillaのshowVigour()（35行目）およびdailyRoutine()（39行目）メソッドは、<br>
+        <span class="red">「オブジェクト」としてsuper()を使用しています。</span>
+    </p>
+
+    <p>
+        次の理由により、superキーワードは2つの方法で使用されます。<br>
+        23行目で、superキーワードは、Gorillaに渡されたパラメーターで親クラスAnimalを呼び出す「関数」として使用されます。<br>
+        これは、ゴリラが動物のインスタンスであることを確認するために実行する重要なステップです。<br>
+        行番号35および39では、super()はAnimalインスタンス（親クラス）を参照する「オブジェクト」として使用されます。<br>
+        ここのsuperキーワードは、親クラスAnimalのメソッドを明示的に呼び出すために使用されます。
+    </p>
+
+    <p>
+        C＃、Java、Pythonなどの言語に精通している人々は、このすべてがどのように機能するかにかなり関連しています。<br>
+        ただし、ES6が登場するまで、特にクラスの場合、JavaScriptはそれほど単純ではありませんでした。<br>
+        では、クラス構文、スーパー、拡張キーワードを使用せずにどのようにコーディングしたのでしょうか？<br>
+        または、彼らは以前にそのような概念を使用した事がなく、突然それらを追加する事に決めましたか？確認してみましょう！
+    </p>
+
+    <h2>従来のJavaScriptクラス</h2>
+
+    <p>
+        真実は、オブジェクト指向JavaScriptが存在し、プロトタイプ継承を使用してクラスを拡張したことです。<br>
+        まったく同じ例を、従来のJavaScript構文を使って見てみましょう。<br>
+        おそらく、これは隠された真実を見つけるのに役立つでしょう。
+    </p>
+
+    <pre>
+
+function Animal(name, weight) {
+    this.name = name;
+    this.weight = weight;
+}
+
+Animal.prototype.eat = function() {
+    return `${this.name} is eating!`;
+}
+
+Animal.prototype.sleep = function() {
+    return `${this.name} is going to sleep!`;
+}
+
+Animal.prototype.wakeUp = function() {
+    return `${this.name} is waking up!`;
+}
+
+
+function Gorilla(name, weight) {
+    Animal.call(this, name, weight);
+}
+
+Gorilla.prototype = Object.create(Animal.prototype);
+Gorilla.prototype.constructor = Gorilla;
+
+Gorilla.prototype.climbTrees = function () {
+    return `${this.name} is climbing trees!`;
+}
+
+Gorilla.prototype.poundChest = function() {
+    return `${this.name} is pounding its chest!`;
+}
+
+Gorilla.prototype.showVigour = function () {
+    return `${Animal.prototype.eat.call(this)} ${this.poundChest()}`;
+}
+
+Gorilla.prototype.dailyRoutine = function() {
+    return `${Animal.prototype.wakeUp.call(this)} ${this.poundChest()} ${Animal.prototype.eat.call(this)} ${Animal.prototype.sleep.call(this)}`;
+}
+
+function display(content) {
+    console.log(content);
+}
+
+var gorilla = new Gorilla('George', '160Kg');
+display(gorilla.poundChest());
+display(gorilla.sleep());
+display(gorilla.showVigour());
+display(gorilla.dailyRoutine());
+
+// OUTPUT:
+// George is pounding its chest!
+// George is going to sleep!
+// George is eating! George is pounding its chest!
+// George is waking up! George is pounding its chest! George is eating! George is going to sleep!
+
+</pre>
+
+    <p class="small">[ES6より前のオブジェクト指向JavaScript]</p>
+
+    <p>
+        あなたが考えているコードを見て、ちょっと待って下さい、単語クラスはどこですか？<br>
+        コンストラクタはどこにありますか？<br>
+        拡張およびスーパーキーワード無しで、古いJavaScriptコードで継承を使用する事も出来ますか？<br>
+        このコードは見苦しくありませんか？
+    </p>
+
+    <p>
+        はい、私はあなたたちがどのように感じるか知っています、私たちは同じページにいます。<br>
+        残念ながら、JavaScriptの基本的な機能は変更されていません。<br>
+        言語にどの機能が追加されても、それらは常に同じままでした。<br>
+        クラス、コンストラクタ、スーパーなどの新しいキーワードを使用すると、<br>
+        コードに構文のフレーバーが追加されるだけで、読みやすく、開発者にとって使いやすくなります。
+    </p>
+
+    <p>
+        ES6の例のどのコード行が従来のJavaScriptの例に適合するかを説明しましょう。<br>
+        JavaScriptのプロトタイプと継承の概念に慣れていない方は、比較セクションに進む前に次の記事をご覧下さい。
+    </p>
+
+    <h3>Prototypes in JavaScript（リンク）</h3>
+
+    <h3>Inheritance in JavaScript（リンク）</h3>
+
+    <p>これらのリファレンスは両方とも、次のセクションを本当によく理解するのに役立ちます。</p>
+
+    <h2>ES6と従来のJavaScriptコードの比較</h2>
+
+    <h3>クラス定義</h3>
+
+    <p>クラス宣言は、次のコードスニペットで比較されます。</p>
+
+    <pre>
+
+// ES6 style
+class Animal {
+    constructor(name, weight) {
+        this.name = name;
+        this.weight = weight;
+    }
+    //...
+}
+
+// Check Type of ES6 class
+typeof Animal // function
+
+// Traditional style
+function Animal(name, weight) {
+    this.name = name;
+    this.weight = weight;
+}
+// ...
+
+</pre>
+
+    <p class="small">[クラス宣言の比較]</p>
+
+    <p>
+        ES6のクラス宣言では、classキーワードを直接使用し、その後にコンストラクタ内でインスタンス変数を定義します。<br>
+        従来のJavaScriptには、クラスなどはありません。実際、クラスは実際にはJavaScriptの内部にある関数です（このスニペットの11行目を参照）。</p>
+
+    <p>
+        3行目のコンストラクタ関数は、14行目とまったく同じです。
+        function Animal()は実際、ここではコンストラクター関数です。</p>
+
+    <h3>クラスの一部としてのメソッド</h3>
+
+    <pre>
+
+// ES6 style
+class Animal {
+    // ...
+    eat() {
+        return `${this.name} is eating!`;
+    }
+
+    sleep() {
+        return `${this.name} is going to sleep!`;
+    }
+
+    wakeUp() {
+        return `${this.name} is waking up!`;
+    }
+    // ...
+}
+
+// Traditional style
+Animal.prototype.eat = function() {
+    return `${this.name} is eating!`;
+}
+
+Animal.prototype.sleep = function() {
+    return `${this.name} is going to sleep!`;
+}
+
+Animal.prototype.wakeUp = function() {
+    return `${this.name} is waking up!`;
+}
+
+</pre>
+
+    <p class="small">[メソッド宣言の比較]</p>
+
+    <p>
+        行4〜14のコードは、ES6スタイルのAnimalクラスに存在するメソッドです。<br>
+        ただし、メソッドを簡単に宣言できるクラスなどは存在しなかったため、これは従来不可能でした。<br>
+        従来のJavaScriptでは、メソッドをプロトタイプに追加すると、クラスでメソッドを使用出来るようになります。<br>
+        行19〜29は、従来のJavaScriptクラスのメソッドです。
+    </p>
+
+    <h3>マッピングが従来のJavaScriptに拡張</h3>
+
+    <p>
+        親クラスをサブクラスで拡張しようとすると、大きな違いが生じます。次のコードスニペットを参照して下さい。
+    </p>
+
+    <pre>
+
+// ES6 style
+class Gorilla extends Animal {
+    constructor(name, weight) {
+        super(name, weight);
+    }
+  //...
+}
+
+// Traditional style
+function Gorilla(name, weight) {
+    Animal.call(this, name, weight);
+}
+
+Gorilla.prototype = Object.create(Animal.prototype);
+Gorilla.prototype.constructor = Gorilla;
+//...
+
+</pre>
+
+    <p>マッピングはキーワードを従来のアプローチに拡張します</p>
+
+    <p>
+        extendsキーワードが、ES6の方法で親クラスAnimalをサブクラスに拡張する事を確認出来ます。
+        ここでもsuperキーワードを使用して、動物の特性と動作を継承するために、<br>
+        Gorillaのコンストラクタを介してAnimalクラスが呼び出されるようにします。</p>
+    ここで、superキーワードは、Gorillaを初期化するためにAnimalクラスを呼び出す関数として使用されます。<br>
+    ここで、super()はAnimal.call(this、…)と同等です。
+    </p>
+
+    <p>
+        従来と同じ事を実現するには、いくつかの追加手順が必要です。<br>
+        サブクラスGorillaの関数は、10行目に従って作成する必要があります。<br>
+        GorillaはAnimalの特性と動作を継承するため、<br>
+        11行目に示すようにGorillaのコンストラクタ内でAnimalのコンストラクタ関数を呼び出す必要があります。<br>
+        この行は4行目に相当し、まったく同じことを行います。<br>
+        呼び出しがGorillaクラスから確実に行われるようにするには、<br>
+        <span class="red">「this」参照をAnimalクラスに明示的に渡す</span>必要があります。
+    </p>
+
+    <p>
+        さらに、11行目に示すように、Gorilla関数のプロトタイプを<br>
+        動物のプロトタイプから作成された新しいオブジェクトとして設定する必要があります。<br>
+        これを行う際に、ゴリラのプロトタイプオブジェクトをオーバーライドします。<br>
+        したがって、次の15行目では、Gorillaのコンストラクターを明示的に設定する必要があります。<br>
+        これらの手順では、GorillaクラスをAnimalクラスのサブクラスとして設定します。
+    </p>
+
+    <h3>従来のJavaScriptへSuperのマッピング</h3>
+
+    <p>
+        スーパーが関数として使用されている次のスニペットで、<br>
+        スーパーキーワード、つまり行4と19のマッピングがすでに1つあります。</p>
+
+    <pre>
+
+// ES6 style
+class Gorilla extends Animal {
+    constructor(name, weight) {
+        super(name, weight);
+    }
+
+    showVigour() {
+        return `${super.eat()} ${this.poundChest()}`;
+    }
+
+    dailyRoutine() {
+        return `${super.wakeUp()} ${this.poundChest()} ${super.eat()} ${super.sleep()}`;
+    }
+    // ...
+}
+
+// Traditional style
+function Gorilla(name, weight) {
+    Animal.call(this, name, weight);
+}
+
+Gorilla.prototype = Object.create(Animal.prototype);
+Gorilla.prototype.constructor = Gorilla;
+
+Gorilla.prototype.showVigour = function () {
+    return `${Animal.prototype.eat.call(this)} ${this.poundChest()}`;
+}
+
+Gorilla.prototype.dailyRoutine = function() {
+    return `${Animal.prototype.wakeUp.call(this)} ${this.poundChest()} ${Animal.prototype.eat.call(this)} ${Animal.prototype.sleep.call(this)}`;
+}
+// ...
+
+</pre>
+
+    <p class="small">[Superキーワードを従来のアプローチにマッピングする]</p>
+
+    <p>
+        キーワードsuperは、8行目と12行目で親クラスのインスタンスとして使用して、<br>
+        Animalクラス固有の詳細を呼び出す事も出来ます。
+        同じことを達成するために、伝統的なスタイルで26行目と30行目は、その方法を示しています。
+    </p>
+
+    <p>
+        スーパーインスタンスは、実際にはParentClassName.prototype.methodName.call(this、...)です。<br>
+        したがって、Parentクラスのメソッドが明示的に呼び出されるようにするには、多くのコードを記述する必要があります。
+    </p>
+
+    <h3>結論</h3>
+
+    <p>
+        従来の方法が提供する複雑さのレベルを知っているので、<br>
+        皆さんはすぐにES6のクラスおよび継承機能をすぐに使用し始めると確信しています。<br>
+        また、ChromeとFirefoxは現在ES6をサポートしていますが、すべてのブラウザーでES6機能をサポートするには、<br>
+        すべてのES6コードをES5コードに変換するためにbabelトランスパイラーが必要です。</p>
+
+    <p>ハッピーハッキング！😄</p>
+
+    <script>
+        console.log("super / extends");
+
+        // アニマルクラス
+        class Animal {
+            constructor(name, weight) {
+                this.name = name;
+                this.weight = weight;
+            }
+
+            eat() {
+                return `${this.name} は、食べています！`;
+            }
+
+            sleep() {
+                return `${this.name} は、寝ています！`;
+            }
+
+            wakeUp() {
+                return `${this.name} は、起きています！`;
+            }
+        }
+
+        // アニマルクラスを継承したゴリラクラス」
+        class Gorilla extends Animal {
+            constructor(name, weight) {
+                super(name, weight);
+            }
+
+            climbTrees() {
+                return `${this.name} は、木に登っています！`;
+            }
+
+            poundChest() {
+                return `${this.name} は、胸をドキドキさせています！`;
+            }
+
+            // 活力を示す
+            showVigour() {
+                return `${super.eat()} ${this.poundChest()}`;
+            }
+
+            // 毎日のルーティーン
+            dailyRoutine() {
+                return `${super.wakeUp()} ${this.poundChest()} ${super.eat()} ${super.sleep()}`;
+            }
+        }
+
+        function display(content) {
+            console.log(content);
+        }
+
+        const gorilla = new Gorilla("George", "160Kg");
+        display(gorilla.poundChest());
+        display(gorilla.sleep());
+        display(gorilla.showVigour());
+        display(gorilla.dailyRoutine());
+
+      // OUTPUT:
+      // George is pounding its chest!
+      // George is going to sleep!
+      // George is eating! George is pounding its chest!
+      // George is waking up! George is pounding its chest! George is eating! George is going to sleep!
+
+    </script>
+</body>
+
+</html>
