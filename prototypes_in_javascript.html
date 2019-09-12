@@ -1,0 +1,521 @@
+<!doctype html>
+
+<head>
+  <meta charset="utf-8">
+  <title>Japanese translation of Medium's JavaScript article.</title>
+<style>
+    .blue {
+        font-weight: bold;
+        color: #3366cc;
+    }
+
+    .red {
+        font-weight: bold;
+        color: #ff0033;
+    }
+
+    h2 {
+        font-weight: bold;
+        color: #3366cc;
+    }
+
+    pre {
+        background-color: #efefef;
+        width: 75%;
+    }
+
+    .small {
+        font-size: 80%;
+        color: #666666;
+    }
+</style>
+</head>
+
+<body>
+
+<p><span class="blue">original page</span><br>
+    <a href="https://medium.com/better-programming/prototypes-in-javascript-5bba2990e04b"
+            target="_blank">Prototypes in JavaScript</a></p>
+
+<p>上記記事を自分なりに解釈する為に翻訳してメモ。<br>（訳が間違っている可能性もあるので、その場合は原文を当たるなりして下さい）</p>
+
+<h1>JavaScriptのプロトタイプ</h1>
+
+<p>
+この投稿では、JavaScriptのプロトタイプとは何か、<br>
+オブジェクト指向プログラミングの概念を実現するためにJavaScriptがどのように役立つかについて説明します。
+</p>
+
+<p>
+前回の投稿では、JavaScriptでオブジェクトを作成するさまざまな方法を学びました。<br>
+JavaScriptでオブジェクトを作成する方法の1つは、コンストラクタ関数を使用する事です。
+</p>
+
+
+<h2>コンストラクタ関数を使用したオブジェクトの作成に関する問題：</h2>
+
+<p>
+以下のコンストラクタ関数について考慮して下さい。</p>
+
+<pre>
+
+01 function Human(firstName, lastName) {
+02 	this.firstName = firstName,
+03 	this.lastName = lastName,
+04 	this.fullName = function() {
+05 		return this.firstName + " " + this.lastName;
+06 	}
+07 }
+08 
+09 var person1 = new Human("Virat", "Kohli");
+10 
+11 console.log(person1)
+
+</pre>
+
+
+
+<p>
+Humanコンストラクタ関数を使用して、オブジェクトperson1およびperson2を作成しましょう。
+</p>
+
+<pre>
+
+var person1 = new Human("Virat", "Kohli");
+var person2 = new Human("Sachin", "Tendulkar");
+
+</pre>
+
+<p>
+上記のコードを実行すると、JavaScriptエンジンは、それぞれperson1とperson2のコンストラクタ関数の2つのコピーを作成します。
+</p>
+
+<p>
+person1: { firstName, lastName, fullName() },<br>
+person2: { firstName, lastName, fullName() }
+</p>
+
+<p>
+つまり、コンストラクタ関数を使用して作成されたすべてのオブジェクトには、<br>
+プロパティとメソッドの独自のコピーがあります。
+同じ事を行う関数fullName()の2つのインスタンスを持つ事は意味がありません。<br>
+オブジェクトごとに関数の個別のインスタンスを保存すると、メモリが無駄になります。<br>
+この問題をどのように解決できるか、今後の課題を検討します。
+</p>
+
+
+<h3>Prototypes（プロトタイプ）</h3>
+
+<p>
+JavaScriptで関数が作成されると、JavaScriptエンジンはプロトタイププロパティを関数に追加します。<br>
+このプロトタイププロパティは、デフォルトでコンストラクタプロパティを持つオブジェクト（プロトタイプオブジェクトと呼ばれます）です。<br>
+コンストラクタプロパティは、プロトタイプオブジェクトがプロパティである関数を指します。<br>
+functionName.prototypeを使用して、関数のプロトタイププロパティにアクセス出来ます。
+</p>
+
+<p><img src="images/fig1.png" alt="fig1" width="803" height="198"></p>
+
+<p>
+上の画像に示すように、Humanコンストラクタ関数には、プロトタイプオブジェクトを指すプロトタイププロパティがあります。<br>
+プロトタイプオブジェクトには、Humanコンストラクター関数を指すコンストラクタープロパティがあります。<br>
+以下の例を見てみましょう：
+</p>
+
+<pre>
+
+function Human(firstName, lastName) {
+	this.firstName = firstName,
+	this.lastName = lastName,
+	this.fullName = function() {
+		return this.firstName + " " + this.lastName;
+	}
+}
+
+var person1 = new Human("Virat", "Kohli");
+
+console.log(person1)
+
+</pre>
+
+<pre>
+
+console.log(person1);
+
+</pre>
+
+<p><img src="images/log1.png" alt="log1" width="799" height="160"></p>
+
+<p>
+Humanコンストラクタ関数のprototypeプロパティにアクセスするには、次の構文を使用します。
+</p>
+
+<pre>
+
+console.log(Human.prototype);
+
+</pre>
+
+<p><img src="images/log2.png" alt="log2" width="902" height="107"></p>
+
+<p>
+上記の画像からわかるように、関数のプロトタイププロパティは、<br>
+2つのプロパティを持つオブジェクト（プロトタイプオブジェクト）です。
+</p>
+
+<ol>
+<li>Human関数自体を指すコンストラクタープロパティ
+<li>__proto__プロパティ：JavaScriptでの継承を説明しながらこれについて説明します
+</ol>
+
+
+<h3>コンストラクタ関数を使用してオブジェクトを作成する</h3>
+
+<p>
+オブジェクトがJavaScriptで作成されると、<br>
+JavaScriptエンジンは__proto__プロパティをdunder protoと呼ばれる新しく作成されたオブジェクトに追加します。<br>
+dunder protoまたは__proto__は、コンストラクタ関数のプロトタイプオブジェクトを指します。
+</p>
+
+<p><img src="images/fig2.png" alt="fig2" width="871" height="460"></p>
+
+<p>
+上の画像に示すように、Humanコンストラクタ関数を使用して作成されたperson1オブジェクトには、<br>
+コンストラクタ関数のプロトタイプオブジェクトを指すdunder protoまたは__proto__プロパティがあります。
+</p>
+
+<pre>
+
+// Create an object person1 using the Human constructor function
+var person1 = new Human("Virat", "Kohli");
+
+</pre>
+
+<p><img src="images/log3.png" alt="log3" width="812" height="439"></p>
+
+<p>
+上の画像から分かるように、person1のdunder protoまたは__proto__プロパティとHuman.prototypeプロパティの両方は同等です。<br>
+===演算子を使用して、同じ場所を指しているかどうかを確認しましょう。
+</p>
+
+<pre>
+
+Human.prototype === person1.__proto__ // true
+
+</pre>
+
+<p>
+これは、person1のdunder protoプロパティとHuman.prototypeが同じオブジェクトを指している事を示しています。
+</p>
+
+<p>
+それでは、ヒューマンコンストラクタ関数を使用して別のオブジェクトperson2を作成しましょう。
+</p>
+
+<pre>
+
+var person2 = new Human("Sachin", "Tendulkar");
+console.log(person2);
+
+</pre>
+
+
+<p><img src="images/log4.png" alt="log4" width="854" height="364"></p>
+
+<p>
+上記のコンソール出力は、person2のdunder protoプロパティでさえHuman.prototypeプロパティと等しく、<br>
+同じオブジェクトを指している事を示しています。
+</p>
+
+
+<pre>
+
+Human.prototype === person2.__proto__ // true
+person1.__proto__ === person2.__proto__ // true
+
+</pre>
+
+<p>
+上記のステートメントは、person1およびperson2のdunder protoプロパティが<br>
+Humanコンストラクター関数のプロトタイプオブジェクトを指している事を証明しています。
+</p>
+
+<p><img src="images/fig3.png" alt="fig3" width="806" height="464"></p>
+
+<p>
+コンストラクタ関数のプロトタイプオブジェクトは、<br>
+コンストラクタ関数を使用して作成されたすべてのオブジェクト間で共有されます。
+</p>
+
+
+<h3>
+Prototype Object（プロトタイプオブジェクト）</h3>
+
+<p>
+プロトタイプオブジェクトはオブジェクトなので、<br>
+プロパティとメソッドをプロトタイプオブジェクトにアタッチ出来ます。<br>
+したがって、コンストラクタ関数を使用して作成された<br>
+すべてのオブジェクトがこれらのプロパティとメソッドを共有出来るようにします。
+</p>
+
+<p>
+以下に示すように、ドット表記または角括弧表記のいずれかを使用して、<br>
+コンストラクタ関数のプロトタイププロパティに新しいプロパティを追加出来ます。
+</p>
+
+<pre>
+
+//Dot notation
+Human.prototype.name = "Ashwin";
+console.log(Human.prototype.name)//Output: Ashwin
+
+//Square bracket notation
+Human.prototype["age"] = 26;
+console.log(Human.prototype["age"]); //Output: 26
+
+console.log(Human.prototype);
+
+</pre>
+
+<p><img src="images/log5.png" alt="log5" width="922" height="303"></p>
+
+<p>
+名前（name）と年齢（age）のプロパティがHumanプロトタイプに追加されました。
+</p>
+
+
+
+<h3>Example（例）</h3>
+
+<pre>
+
+//Create an empty constructor function
+function Person(){
+
+}
+//Add property name, age to the prototype property of the Person constructor function
+Person.prototype.name = "Ashwin" ;
+Person.prototype.age = 26;
+Person.prototype.sayName = function(){
+	console.log(this.name);
+}
+
+//Create an object using the Person constructor function
+var person1 = new Person();
+
+//Access the name property using the person object
+console.log(person1.name)// Output" Ashwin
+
+</pre>
+
+<p>
+console.log（person.name）を実行したときに何が起こったかを分析しましょう。<br>
+人物オブジェクトに名前プロパティがあるかどうかを確認しましょう。
+</p>
+
+
+<pre>
+
+console.log(person1);
+
+</pre>
+
+<p><img src="images/log6.png" alt="log6" width="1063" height="224"></p>
+
+<p>
+ご覧のとおり、person1オブジェクトは空であり、dunder protoプロパティ以外のプロパティはありません。<br>
+では、console.log（person.name）の出力はどのように「Ashwin」でしたか？
+</p>
+
+<p>
+オブジェクトのプロパティにアクセスしようとすると、JavaScriptエンジンは最初にオブジェクトのプロパティを見つけようとします。<br>
+プロパティがオブジェクトに存在する場合、その値を出力します。<br>
+ただし、オブジェクトにプロパティが存在しない場合、<br>
+プロトタイプオブジェクトまたはオブジェクトのダンダープロトタイプでプロパティを見つけようとします。<br>
+プロパティが見つかった場合、値が返されます。<br>
+それ以外の場合、JavaScriptエンジンはオブジェクトのダンダープロトでプロパティを見つけようとします。<br>
+このチェーンは、dunder protoプロパティがnullになるまで続きます。これらの場合、出力は未定義（undefined）になります。
+</p>
+
+<p>
+したがって、person1.nameが呼び出されると、<br>
+JavaScriptエンジンはperson1オブジェクトにプロパティが存在するかどうかを確認します。<br>
+この場合、nameプロパティはperson1のオブジェクトにはありませんでした。<br>
+そのため、JavaScriptエンジンはnameプロパティがdunder protoプロパティまたは<br>
+person1のオブジェクトのプロトタイプに存在するかどうかを確認します。<br>
+この場合、nameプロパティは、dunder protoプロパティまたはperson1のオブジェクトのプロトタイプにありました。<br>
+したがって、出力は「Ashwin」と返されました。
+</p>
+
+<p>
+Personコンストラクタ関数を使用して、別のオブジェクトperson2を作成しましょう。
+</p>
+
+<pre>
+
+var person2 = new Person();
+//Access the name property using the person2 object
+console.log(person2.name)// Output: Ashwin
+
+</pre>
+
+<p>
+次に、person1オブジェクトのプロパティ名を定義しましょう。
+</p>
+
+
+<pre>
+
+person1.name = "Anil"
+console.log(person1.name)//Output: Anil
+console.log(person2.name)//Output: Ashwin
+
+</pre>
+
+<p>
+ここでperson1.nameは「Anil」を出力します。<br>
+前述のように、JavaScriptエンジンは最初にオブジェクト自体のプロパティを見つけようとします。<br>
+この場合、nameプロパティはオブジェクトperson1自体に存在するため、JavaScriptエンジンはperson1のnameプロパティの値を出力します。
+</p>
+
+<p>
+person2の場合、nameプロパティはオブジェクトに存在しません。<br>
+したがって、person2のプロトタイプオブジェクトのプロパティ名を出力します。
+</p>
+
+<h3>プロトタイプの問題</h3>
+
+<p>
+プロトタイプオブジェクトは、コンストラクタ関数を使用して作成されたすべてのオブジェクト間で共有されるため、<br>
+そのプロパティとメソッドもすべてのオブジェクト間で共有されます。<br>
+オブジェクトAがプリミティブ値を持つプロトタイプのプロパティを変更した場合、<br>
+他のオブジェクトは、以下に示すようにオブジェクトAがそのオブジェクトにプロパティを作成するため、影響を受けません。
+</p>
+
+
+<pre>
+
+console.log(person1.name);//Output: Ashwin
+console.log(person2.name);//Output: Ashwin
+
+person1.name = "Ganguly"
+
+console.log(perosn1.name);//Output: Ganguly
+console.log(person2.name);//Output: Ashwin
+
+</pre>
+
+<p>
+ここ（1行目と2行目）では、person1とperson2の両方にnameプロパティがないため、<br>
+プロトタイプのnameプロパティにアクセスするため、出力は両方とも同じです。
+</p>
+
+<p>
+person1は、nameプロパティに別の値を設定する場合、オブジェクトにnameプロパティを作成します。
+</p>
+
+<h3>プロトタイプオブジェクトに参照型のプロパティが含まれている場合に、<br>
+プロトタイプの問題を表示する別の例を考えてみましょう。</h3>
+
+<pre>
+
+//Create an empty constructor function
+function Person(){
+}
+//Add property name, age to the prototype property of the Person constructor function
+Person.prototype.name = "Ashwin" ;
+Person.prototype.age = 26;
+Person.prototype.friends = ['Jadeja', 'Vijay'],//Arrays are of reference type in JavaScript
+Person.prototype.sayName = function(){
+	console.log(this.name);
+}
+
+//Create objects using the Person constructor function
+var person1= new Person();
+var person2 = new Person();
+
+//Add a new element to the friends array
+person1.friends.push("Amit");
+
+console.log(person1.friends);// Output: "Jadeja, Vijay, Amit"
+console.log(person2.friends);// Output: "Jadeja, Vijay, Amit"
+
+</pre>
+
+<p>
+上記の例では、person1とperson2は、プロトタイプオブジェクトの同じ友人の配列を指します。<br>
+person1は、配列に別の文字列を追加してfriendsプロパティを変更します。
+</p>
+
+<p>
+友人の配列はperson1ではなくPerson.prototypeに存在するため、<br>
+person1オブジェクトによる友人のプロパティの変更は、person2.friends（同じ配列を指す）にも反映されます。
+</p>
+
+<p>
+すべてのインスタンスでアレイを共有する事を目的とする場合、<br>
+この結果は問題ありません。しかし、ここではそうではありませんでした。
+</p>
+
+<h3>コンストラクタ/プロトタイプを組み合わせる</h3>
+
+<p>
+プロトタイプの問題とコンストラクタの問題を解決するために、<br>
+コンストラクタと関数の両方を組み合わせる事が出来ます。
+</p>
+
+<ol>
+<li>コンストラクタ関数の問題：すべてのオブジェクトには関数の独自のインスタンスがあります
+<li>プロトタイプの問題：1つのオブジェクトを使用してプロパティを変更すると、他のオブジェクトにも反映されます
+</ol>
+
+<p>
+両方の問題を解決するために、以下に示すように、コンストラクタ内のすべてのオブジェクト固有のプロパティと、<br>
+プロトタイプ内のすべての共有プロパティとメソッドを定義出来ます。
+</p>
+
+<pre>
+
+//Define the object specific properties inside the constructor
+function Human(name, age){
+	this.name = name,
+	this.age = age,
+	this.friends = ["Jadeja", "Vijay"]
+}
+//Define the shared properties and methods using the prototype
+Human.prototype.sayName = function(){
+	console.log(this.name);
+}
+//Create two objects using the Human constructor function
+var person1 = new Human("Virat", 31);
+var person2 = new Human("Sachin", 40);
+
+//Lets check if person1 and person2 have points to the same instance of the sayName function
+console.log(person1.sayName === person2.sayName) // true
+
+//Let's modify friends property and check
+person1.friends.push("Amit");
+
+console.log(person1.friends)// Output: "Jadeja, Vijay, Amit"
+console.log(person2.friends)//Output: "Jadeja, Vijay"
+
+</pre>
+
+<p>
+ここでは、各オブジェクトに独自の名前、年齢、友人のプロパティを持たせたいと思っています。<br>
+したがって、これを使用してコンストラクタ内でこれらのプロパティを定義しました。
+</p>
+
+<p>
+ただし、sayName()はプロトタイプオブジェクトで定義されているため、すべてのオブジェクトで共有されます。
+</p>
+
+<p>
+上記の例では、person1の友人のプロパティを変更しても、person2の友人のプロパティは変更されませんでした。</p>
+
+
+<p><img src="images/fig4.png" alt="fig4" width="770" height="540"></p>
+
+</script>
+</body>
+
+</html>
